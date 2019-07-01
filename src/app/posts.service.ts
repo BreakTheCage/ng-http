@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpParams, HttpEventType } from '@angular/common/http';
 import { Post } from './post.model';
 import { map, catchError, tap } from 'rxjs/operators';
 import { Subject, throwError } from 'rxjs';
@@ -31,10 +31,18 @@ export class PostsService {
         return this.http.delete(
             'https://ng-http-c780a.firebaseio.com/posts.json',
             {
-                observe: 'events' //'body', 'response'
+                observe: 'events', //'body', 'response'
+                responseType: 'text' //'blob': fiel, 'json': convert automatically, 'text': don't convert
             }
         ).pipe(tap(event => {
-            
+            console.log('event: ', event);
+            if (event.type === HttpEventType.Sent) {
+                //request is sent and we are waiting for response ...
+                console.log('event is sent...');
+            }
+            if (event.type === HttpEventType.Response) {
+                console.log("Event Body: ", event.body);
+            }
         }));
     }
 
@@ -48,7 +56,8 @@ export class PostsService {
                 {
                     headers: new HttpHeaders({"My-Custom-Header": "Hello"}),
                     // params: new HttpParams().set('print','pretty'),
-                    params: searchParams
+                    params: searchParams,
+                    responseType: 'json'
                 }
             )
             .pipe(
