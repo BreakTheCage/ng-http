@@ -2,11 +2,12 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Post } from './post.model';
 import { map } from 'rxjs/operators';
+import { Subject } from 'rxjs';
 
 
 @Injectable({providedIn: 'root'})
 export class PostsService {
-
+    errorSubject = new Subject<string>();
     constructor(private http: HttpClient){}
 
     createAndStorePost(title: string, content: string) {
@@ -16,7 +17,12 @@ export class PostsService {
              postData
              ).subscribe(responseData => {
               console.log('Recived From Server: ', responseData);
+             }, error => {
+                 this.errorSubject.next(error.message);
              });
+    }
+    deletePosts() {
+        return this.http.delete('https://ng-http-c780a.firebaseio.com/posts.json');
     }
 
     fetchPosts() {
